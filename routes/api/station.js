@@ -3,16 +3,15 @@ var router = express.Router();
 var jwt = require('jsonwebtoken');
 var axios = require('axios');
 var verifyToken = require('../helpers').verifyToken;
+var stationURL = require('../helpers').stationURL;
 
 const getStationData = async (req) => {
-  const matchingStation = axios
-    .get('https://gbfs.divvybikes.com/gbfs/en/station_information.json')
-    .then((response) => {
-      const allStations = response.data.data.stations;
-      return allStations.filter(
-        (station) => station.station_id === req.params.id
-      );
-    });
+  const matchingStation = axios.get(stationURL).then((response) => {
+    const allStations = response.data.data.stations;
+    return allStations.filter(
+      (station) => station.station_id === req.params.id
+    );
+  });
 
   return matchingStation;
 };
