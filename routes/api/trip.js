@@ -5,8 +5,10 @@ var AdmZip = require('adm-zip');
 var axios = require('axios');
 var verifyToken = require('../helpers').verifyToken;
 var tripDataURL = require('../helpers').URLS.tripData;
+var grep = require('../helpers').grep;
 
 const getTripData = (req, res) => {
+  var matches = [];
   axios
     .get(tripDataURL, {
       responseType: 'arraybuffer',
@@ -16,9 +18,8 @@ const getTripData = (req, res) => {
     })
     .then((zip) => {
       var zipEntries = zip.getEntries();
-      for (var i = 0; i < zipEntries.length; i++) {
-        console.log(zip.readAsText(zipEntries[i]));
-      }
+      // the data is in the first entry of the zip file, all other entries are metadata
+      matches = grep(zipEntries[0].getData().toString(), '2019-04-02');
     });
 };
 
