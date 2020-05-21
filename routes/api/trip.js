@@ -7,8 +7,7 @@ var verifyToken = require('../helpers').verifyToken;
 var tripDataURL = require('../helpers').URLS.tripData;
 var grep = require('../helpers').grep;
 
-const getTripData = (req, res) => {
-  var matches = [];
+const getTripData = (req) => {
   axios
     .get(tripDataURL, {
       responseType: 'arraybuffer',
@@ -19,17 +18,21 @@ const getTripData = (req, res) => {
     .then((zip) => {
       var zipEntries = zip.getEntries();
       // the data is in the first entry of the zip file, all other entries are metadata
-      matches = grep(zipEntries[0].getData().toString(), '2019-04-02');
+      // TODO: pass correct date string
+      return grep(zipEntries[0].getData().toString(), req.body.day);
+    })
+    .then((matchArray) => {
+      return matchArray;
     });
 };
 
-router.get('/', verifyToken, (req, res) => {
+router.post('/ageGroups', verifyToken, (req, res) => {
   jwt.verify(req.token, process.env.SECRET, (err) => {
     if (err) {
       res.sendStatus(403);
     } else {
       try {
-        getTripData(req, res);
+        res.json(getTripData(req));
       } catch (error) {
         console.log(error);
       }
