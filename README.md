@@ -29,4 +29,4 @@ You need to get your API token before accessing any endpoints.
 
 # Comments
 
-- I didn't .gitignore the .env file because it's just extra work for you and we both know it should be .gitignored
+- I didn't `.gitignore` the `.env` file because it's just extra work for you and we both know it's supposed to be in the `.gitignore` so whatever
