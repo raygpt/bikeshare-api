@@ -3,9 +3,9 @@ var router = express.Router();
 var jwt = require('jsonwebtoken');
 var axios = require('axios');
 var verifyToken = require('../helpers').verifyToken;
-var stationURL = require('../helpers').stationURL;
+var stationURL = require('../helpers').URLS.station;
 
-const getStationData = async (req) => {
+const getStationData = (req) => {
   const matchingStation = axios.get(stationURL).then((response) => {
     const allStations = response.data.data.stations;
     return allStations.filter(
@@ -16,7 +16,7 @@ const getStationData = async (req) => {
   return matchingStation;
 };
 
-/* 1. Get station by ID */
+/* Get station by ID */
 router.get('/:id', verifyToken, async (req, res) => {
   jwt.verify(req.token, process.env.SECRET, async (err) => {
     if (err) {
