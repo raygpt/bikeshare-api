@@ -9,7 +9,11 @@
 
 You need to get your API token before accessing any endpoints.
 
-Call `http://localhost:3000/auth/token` in Postman and copy the value of the token field. Next, go to the Headers tab in Postman and add `Authorization` as a header key and `Bearer <your token here>` as the value.
+1. Call `http://localhost:3000/auth/token` in Postman and copy the value of the token field.
+
+2. Go to the Headers tab in Postman and add `Authorization` as a header key and `Bearer <your token here>` as the value.
+
+3. Without your token, you will get a `403 Forbidden` response from the server.
 
 # Endpoints
 
