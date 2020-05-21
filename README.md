@@ -24,5 +24,5 @@ You need to get your API token before accessing any endpoints.
 
 ### 2. Given one or more bike stations, return the number of riders in the age groups [0-20, 21-30, 31-40, 41-50, 51+, unknown] who ended their trip at that station for a given day
 
-- In Postman, go to the Body tab and select `x-www-form-urlencoded` and enter a key called `day` with a value in the format `YYYY-MM-DD`. Dates are valid from 2019-04-02 to 2019-06-30.
+- In Postman, go to the Body tab and select `x-www-form-urlencoded` and enter a key called `day` with a value in the format `YYYY-MM-DD`. Dates are valid from `2019-04-02` to `2019-06-30`.
 - Send a `POST` request to `http://localhost:3000/trip/ageGroups`
