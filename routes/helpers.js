@@ -1,6 +1,7 @@
 const fs = require('fs'),
   child_process = require('child_process'),
-  tmp = require('tmp');
+  tmp = require('tmp'),
+  moment = require('moment');
 
 exports.URLS = {
   station: 'https://gbfs.divvybikes.com/gbfs/en/station_information.json',
@@ -8,16 +9,18 @@ exports.URLS = {
     'https://s3.amazonaws.com/divvy-data/tripdata/Divvy_Trips_2019_Q2.zip',
 };
 
-/* Converting to JSON is expensive, so we only do it after grepping for elements in the file that match our query */
-function parseMatchesToJSON(stdout) {
-  /* Using map and split is an efficient way to do this mapping without resorting to typical O(n2) complexity of 
-  JSON parsing. Though this code is technically O(n2) in the worst case due to .map(), the worst case is very 
+/* Converting to JSON is expensive, so we only do it after grepping for elements in the file that match our query.
+   Using map and split is an efficient way to do this mapping without resorting to typical O(n2) complexity of 
+   JSON parsing. Though this code is technically O(n2) in the worst case due to .map(), the worst case is very 
    unlikely to happen since each individual string is short (and predictably so). Since split is O(n), map is O(n) 
    and chaining O(n) operations still results in linear complexity, the complexity of this code is O(n), where n is 
-   number of characters in the entire stdout string. */
+   number of characters in the entire stdout string.*/
 
+function parseMatchesToJSON(stdout) {
+  // clean up the data before parsing
+  stdout = stdout.replace(/\n$/, '');
   const matchesArray = stdout.split('\n').map((element) => ({
-    [element.split(',')[2]]: {
+    [moment(element.split(',')[2]).format('YYYY-MM-DD')]: {
       startDate: element.split(',')[1],
       endDate: element.split(',')[2],
       startStation: `${element.split(',')[5]} ${element.split(',')[6]}`,
