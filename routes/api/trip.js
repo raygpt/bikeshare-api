@@ -18,7 +18,6 @@ const getTripData = (req) => {
     .then((zip) => {
       var zipEntries = zip.getEntries();
       // the data is in the first entry of the zip file, all other entries are metadata
-      // TODO: pass correct date string
       return grep(zipEntries[0].getData().toString(), req.body.day);
     })
     .then((matchArray) => {

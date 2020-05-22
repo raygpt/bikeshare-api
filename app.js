@@ -6,7 +6,6 @@ require('dotenv').config();
 
 var authRouter = require('./routes/auth');
 var stationRouter = require('./routes/api/station');
-var ridersRouter = require('./routes/api/rider');
 var tripRouter = require('./routes/api/trip');
 
 var app = express();
@@ -17,7 +16,6 @@ app.use(cookieParser());
 
 app.use('/auth', authRouter);
 app.use('/station', stationRouter);
-app.use('/rider', ridersRouter);
 app.use('/trip', tripRouter);
 
 app.use(function (req, res, next) {

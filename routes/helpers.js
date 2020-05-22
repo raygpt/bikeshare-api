@@ -1,7 +1,6 @@
-// calling .track() allows for automatic deletion of all temp files after process close
-var temp = require('temp').track(),
-  fs = require('fs'),
-  child_process = require('child_process');
+const fs = require('fs'),
+  child_process = require('child_process'),
+  tmp = require('tmp');
 
 exports.URLS = {
   station: 'https://gbfs.divvybikes.com/gbfs/en/station_information.json',
@@ -9,36 +8,59 @@ exports.URLS = {
     'https://s3.amazonaws.com/divvy-data/tripdata/Divvy_Trips_2019_Q2.zip',
 };
 
-function loadMatchesToArray(stdout) {
-  var matches = stdout.split('\n');
-  return matches;
+/* Converting to JSON is expensive, so we only do it after grepping for elements in the file that match our query */
+function parseMatchesToJSON(stdout) {
+  /* Using map and split is an efficient way to do this mapping without resorting to typical O(n2) complexity of 
+  JSON parsing. Though this code is technically O(n2) in the worst case due to .map(), the worst case is very 
+   unlikely to happen since each individual string is short (and predictably so). Since split is O(n), map is O(n) 
+   and chaining O(n) operations still results in linear complexity, the complexity of this code is O(n), where n is 
+   number of characters in the entire stdout string. */
+
+  const matchesArray = stdout.split('\n').map((element) => ({
+    [element.split(',')[2]]: {
+      startDate: element.split(',')[1],
+      endDate: element.split(',')[2],
+      startStation: `${element.split(',')[5]} ${element.split(',')[6]}`,
+      endStation: `${element.split(',')[7]} ${element.split(',')[8]}`,
+      memberType: element.split(',')[9],
+      gender: element.split(',')[10],
+      birthYear: element.split(',')[11],
+    },
+  }));
+
+  return matchesArray;
 }
 
-/* stream the zip file's data to a temporary file and spawn a grep child shell process 
+/* Stream the zip file's data to a temporary file and spawn a grep child shell process 
 (which is infinitely faster and less cpu-intensive than any hand-spun i/o javascript)
  to return all the lines that contain the specific date we're looking for, deleting the temporary file 
- after we finish the analysis
+ after we finish the analysis. 
+ I could have used ack instead of grep for even faster searching, but that
+ would require some extra OS dependencies to run on a different server and I didn't want to overengineer this.
 */
-
 exports.grep = function grepWithFork(data, pattern) {
   return new Promise(async (resolve) => {
-    temp.open('tempFile', function (err, info) {
+    tmp.file(function _tempFileCreated(err, path, fd, cleanupCallback) {
       if (!err) {
-        /* i really didn't want to put this in a temporary file and tried for hours to try and pipe the data
-         directly to grep but the file string was too big to pass as an argument (grep only allows you to pass 
-          strings of up to 128kb) */
-        fs.write(info.fd, data, (err) => {
+        /* I really didn't want to put this in a temporary file and tried for a while to try and pipe the data
+         directly to grep but debugging stdin/out on a forked multi-core process was taking me a long time and 
+         I needed to move forward. I would probably try to pipe it directly if I had the time. */
+        fs.write(fd, data, (err) => {
           if (err) {
             console.log(err);
           }
         });
-        fs.close(info.fd, function (err) {
-          child_process.exec(`grep ${pattern} ${info.path}`, function (
-            err,
-            stdout
-          ) {
-            resolve(loadMatchesToArray(stdout));
-          });
+        fs.close(fd, function (err) {
+          // set a large max buffer size or the data will be truncated
+          child_process.exec(
+            `grep ${pattern} ${path}`,
+            { maxBuffer: 200000000 },
+            function (err, stdout) {
+              resolve(parseMatchesToJSON(stdout));
+              // remove temp file after promise is resolved
+              cleanupCallback();
+            }
+          );
         });
       }
     });
