@@ -19,19 +19,9 @@ exports.URLS = {
 function parseMatchesToJSON(stdout) {
   // clean up the data before parsing
   stdout = stdout.replace(/\n$/, '');
-  const matchesArray = stdout.split('\n').map((element) => ({
-    [moment(element.split(',')[2]).format('YYYY-MM-DD')]: {
-      startDate: element.split(',')[1],
-      endDate: element.split(',')[2],
-      startStation: `${element.split(',')[5]} ${element.split(',')[6]}`,
-      endStation: `${element.split(',')[7]} ${element.split(',')[8]}`,
-      memberType: element.split(',')[9],
-      gender: element.split(',')[10],
-      birthYear: element.split(',')[11],
-    },
-  }));
-
-  return matchesArray;
+  const matchesArray = stdout.split('\n');
+  console.log(matchesArray[1].split(',(?=(?:[^"]*"[^"]*")*[^"]*$)'));
+  // return matchesArray;
 }
 
 /* Stream the zip file's data to a temporary file and spawn a grep child shell process 

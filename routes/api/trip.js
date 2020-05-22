@@ -25,7 +25,9 @@ const getTripData = (date) => {
     });
 };
 
+// work in progress method intended to figure out the best way to parse the trip data and get riders by age groups
 const getRiderData = async (date, trips, stations) => {
+  // stations should be passed from request but we're mocking it here for simplicity
   stations = ['195 Columbus Dr & Randolph St'];
   const ridersAtStationByDay = [];
   for (var day in trips) {
@@ -33,9 +35,11 @@ const getRiderData = async (date, trips, stations) => {
       ridersAtStationByDay.push(trips[day]);
     }
   }
+
   return ridersAtStationByDay;
 };
 
+// Get riders by age groups given a day and one or more stations
 router.post('/ageGroups', verifyToken, (req, res) => {
   jwt.verify(req.token, process.env.SECRET, async (err) => {
     if (err) {
@@ -46,7 +50,7 @@ router.post('/ageGroups', verifyToken, (req, res) => {
         const date = req.body.day;
         const trips = await getTripData(date);
         const riders = await getRiderData(date, trips, stations);
-        res.send(riders);
+        // res.send(trips);
       } catch (error) {
         console.log(error);
       }
