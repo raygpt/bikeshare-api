@@ -1,10 +1,13 @@
 const moment = require('moment');
+
 const updateStationData = (dict, stationID, data) => {
   if (!Object.prototype.hasOwnProperty.call(dict, stationID)) {
     dict[stationID] = [];
   }
   dict[stationID].push(data);
 };
+
+// Binary search by date
 const findLowerBound = (list, target_moment) => {
   let l = -1,
     r = list.length;
@@ -18,6 +21,7 @@ const findLowerBound = (list, target_moment) => {
   }
   return l;
 };
+
 class TripDictionary {
   constructor() {
     this.ageRangeData = {
@@ -30,6 +34,7 @@ class TripDictionary {
     };
     this.stationTrips = {};
   }
+
   addTrip(tripData) {
     const endDateMoment = moment(tripData.endDate, 'YYYY-MM-DD hh:mm:ss');
     const riderBirthYear = parseInt(tripData.birthYear);
@@ -54,11 +59,13 @@ class TripDictionary {
         endDateMoment,
       });
     }
+
     updateStationData(this.stationTrips, tripData.endStationID, {
       endDateMoment,
       trip: tripData,
     });
   }
+
   finalize() {
     for (let ageRange in this.ageRangeData) {
       for (let stationID in this.ageRangeData[ageRange]) {
@@ -73,6 +80,7 @@ class TripDictionary {
       );
     }
   }
+
   getStationLastTrips(stationID, targetDate) {
     if (!Object.prototype.hasOwnProperty.call(this.stationTrips, stationID))
       return [];
@@ -85,6 +93,7 @@ class TripDictionary {
     l = Math.max(l, r - 20);
     return this.stationTrips[stationID].slice(l, r).reverse();
   }
+
   getAgeGroups(listStationIDs, targetDate) {
     let momentEnd = moment(targetDate, 'YYYY-MM-DD').endOf('day');
     let momentStart = moment(targetDate, 'YYYY-MM-DD')

@@ -9,6 +9,8 @@ var stationRouter = require('./routes/api/station');
 var tripRouter = require('./routes/api/trip');
 
 var app = express();
+const helper = require('./routes/helpers');
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -30,8 +32,15 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
 });
 
-app.listen(3000, () => {
-  console.log('Server listening on port 3000');
-});
+helper
+  .initDictionary()
+  .then(() => {
+    app.listen(3000, () => {
+      console.log('Server listening on port 3000');
+    });
+  })
+  .catch((e) => {
+    console.log('Something went wrong initializing the dictionary.', e);
+  });
 
 module.exports = app;
